@@ -19,34 +19,38 @@ namespace TF_core.Controllers
                 return View();
             else
             {
+                MainModel.UserID = User.Identities.First().Name;
                 Repo.db = new GraphClient(new Uri("http://localhost:11003/db/data"));
                 //db = new GraphClient(new Uri("https://hobby-cjifkhhaanncgbkeedghmepl.dbs.graphenedb.com:24780/db/data/"), "a1oleg", "b.JgAr7iM4iqi3.PtrraWURkTLBhkB0");
 
                 Repo.db.Connect();
-
-                string email = User.Identities.First().Name;
+                
                 if (!User.Identities.First().Claims.Where(c => c.Type == "InDB").Any())
                 {
-                    Repo.MergeVertex(email, "User");
+                    Repo.MergeVertex(MainModel.UserID, "User");
                     User.Identities.First().AddClaim(new System.Security.Claims.Claim("InDB", "true"));
                 }
                 else if (User.Identities.First().Claims.Where(c => c.Type == "Complete").Single().Value == "true")
-                    return RedirectToAction("GetTeamsFromDB");
-
+                {
+                    Repo.GetTeams();
+                    return View();
+                }
+                    
                 GetTimeLine();
-                MainModel.Pool = new List<IUser>();
-                return RedirectToAction("CreateTeams");
+                
+                return RedirectToAction("GetPool");
             }
         }       
 
-        public ViewResult CreateTeams()
-        { 
+        public ViewResult GetPool()
+        {
+            MainModel.Pool = new List<IUser>();
             while (MainModel.Pool.Count < 5)
             {
                 IUser newUnit = MainModel.TimeLine.ElementAt(new Random().Next(0, MainModel.TimeLine.Count()));
                 MainModel.TimeLine.Remove(newUnit);
 
-                if (!MainModel.Friendly.Concat(MainModel.Enemy).Where(u => u.ScreenName == newUnit.ScreenName).Any())
+                if (!MainModel.Team.Where(u => u.Name == newUnit.ScreenName).Any())
                     MainModel.Pool.Add(newUnit);
             }
             return View("Index");
@@ -57,31 +61,23 @@ namespace TF_core.Controllers
             IUser PickedUnit = MainModel.Pool.Where(u => u.ScreenName == ScreenName).Single();
             MainModel.Pool.Remove(PickedUnit);
 
-            var targetTeam = MainModel.DoD ? MainModel.Friendly : MainModel.Enemy;
+            MainModel.Team.Add(new Unit() { Name = PickedUnit.ScreenName, ProfileImage = PickedUnit.ProfileImageUrl400x400, Friendly = MainModel.DoD });
 
-            targetTeam.Add(new Unit() { ScreenName = PickedUnit.ScreenName, ProfileImage = PickedUnit.ProfileImageUrl400x400 });
-
-            return RedirectToAction("CheckTeams");
+            if (MainModel.Team.Count() < 10)
+                return RedirectToAction("GetPool");
+            else return RedirectToAction("FinalTeams");
         }
 
-        public IActionResult CheckTeams()
+        public ViewResult FinalTeams()
         {
-            if (MainModel.Friendly.Count() + MainModel.Enemy.Count() >= 10)
+            foreach (Unit u in MainModel.Team)
             {
-                MainModel.Pool = null;
-                return View("Index");
+                Repo.MergeVertex(u.Name, "Unit");
+                Repo.MergeRelationship(u.Name, u.Friendly.ToString());
             }
-            else
-                return RedirectToAction("CreateTeams");
-        }
-
-        public ViewResult GetTeamsFromDB()
-        {
-            MainModel.Friendly = new List<Unit>(Repo.GetWithRelName(User.Identities.First().Claims.Where(c => c.Type == "emails").Single().Value, "Friendly"));
-            MainModel.Enemy = new List<Unit>(Repo.GetWithRelName(User.Identities.First().Claims.Where(c => c.Type == "emails").Single().Value, "Enemy"));
-
+            MainModel.Pool = null;
             return View("Index");
-        }
+        }        
 
         public void GetTimeLine()
         {
@@ -93,6 +89,8 @@ namespace TF_core.Controllers
             foreach (ITweet tweet in Timeline.GetHomeTimeline().Distinct()) //Aggregate
                 MainModel.TimeLine.Add(tweet.CreatedBy);
         }
+        
+        
         //[AllowAnonymous]
         //[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         //public IActionResult Error()

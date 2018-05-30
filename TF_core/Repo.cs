@@ -10,14 +10,14 @@ namespace TF_core.Controllers
     {
         public static GraphClient db;
 
-        internal static IEnumerable<Unit> GetWithRelName(string email, string relname)
-        {            
-            return  db.Cypher
-               .Match($"(a)-[:{relname}]->(b)")
-               .Where((Unit a) => a.ScreenName == email)
+        internal static void GetTeams()
+        {
+            MainModel.Team = new List<Unit>(db.Cypher
+               .Match($"(a)-[]->(b)")
+               .Where((Unit a) => a.Name == MainModel.UserID)
                .ReturnDistinct
                (b => b.CollectAs<Unit>())
-               .Results.First();
+               .Results.First());
         }
 
         internal static void MergeVertex(string name, string label)
@@ -29,5 +29,14 @@ namespace TF_core.Controllers
            .ExecuteWithoutResults();            
         }
 
+        internal static void MergeRelationship(string second, string relname)
+        {
+            db.Cypher
+            .Match("(a)", "(b)")
+            .Where((Unit a) => a.Name == MainModel.UserID)
+            .AndWhere((Unit b) => b.Name == second)
+            .Merge($"(a)-[:{relname}]->(b)")
+            .ExecuteWithoutResults();
+        }
     }
 }

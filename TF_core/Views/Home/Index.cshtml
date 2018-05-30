@@ -36,8 +36,8 @@
 @if (User.Identities.First().IsAuthenticated)
 {
 <div class="row">
-    <div class="col-md-4 team textgreen @MainModel.Friendly.Count <=2 ? " yourback":"")">
-        @foreach (Unit unit in MainModel.Friendly)
+    <div class="col-md-4 team textgreen @MainModel.Team.Where(u => u.Friendly).Count() <=2 ? " yourback":"")">
+        @foreach (Unit unit in MainModel.Team.Where(u => u.Friendly))
         {
             @Html.Partial("_TeamUnitPartial", unit)
         }
@@ -58,8 +58,8 @@
         }
     </div>
     
-    <div class="col-md-4 team textred @(MainModel.Enemy.Count <=2 ? "enemyback":"")">
-        @foreach (Unit unit in MainModel.Enemy)
+    <div class="col-md-4 team textred @(MainModel.Team.Where(u => !u.Friendly).Count() <=2 ? "enemyback":"")">
+        @foreach (Unit unit in MainModel.Team.Where(u => !u.Friendly))
         {
             @Html.Partial("_TeamUnitPartial", unit)
         }
