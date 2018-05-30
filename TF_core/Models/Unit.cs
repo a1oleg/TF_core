@@ -1,4 +1,4 @@
-﻿namespace TF_core.Controllers
+﻿namespace TF_core.Models
 {
     public class Unit
     {

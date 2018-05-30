@@ -4,11 +4,11 @@ using Tweetinvi.Models;
 
 namespace TF_core.Models
 {
-    internal static class MainModel
+    public static class MainModel
     {
-        public static List<Unit> Friendly { get; set; }
+        public static List<Unit> Friendly { get; set; } = new List<Unit>();
         public static List<IUser> Pool { get; set; }
-        public static List<Unit> Enemy { get; set; }
+        public static List<Unit> Enemy { get; set; } = new List<Unit>();
 
         public static List<IUser> TimeLine { get; set; }
 

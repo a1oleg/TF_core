@@ -1,5 +1,5 @@
 ﻿@using TF_core.Models
-
+@using Tweetinvi.Models;
 
 <style>
     .custom {
@@ -35,30 +35,37 @@
 
 @if (User.Identities.First().IsAuthenticated)
 {
-    <div class="row">
-        <div class="col-md-4 team textgreen @MainModel.Friendly.Count <=2 ? "yourback":"")">
-            @Html.Partial("_TeamPartial", Model.Yourteam)
-        </div>
-
-        @if (Model.Pool != null)
+<div class="row">
+    <div class="col-md-4 team textgreen @MainModel.Friendly.Count <=2 ? " yourback":"")">
+        @foreach (Unit unit in MainModel.Friendly)
         {
-            <div class="col-md-4">
-                @Html.Partial("_PoolPartial", Model)
-            </div>
+            @Html.Partial("_TeamUnitPartial", unit)
         }
-        else if (Model.Pool == null)
-        {
-            <div class="col-md-4 team poolback">
-                <h3>teams completed!</h3>
-                <h3>Results will be send on your e - mail</h3>
-            </div>
-        }
-
-        <div class="col-md-4 team textred @(MainModel.Enemy.Count <=2 ? "enemyback":"")">
-            @Html.Partial("_TeamPartial", Model.Enemyteam)
-        </div>
-
     </div>
+
+    <div class="col-md-4">
+        @if (MainModel.Pool != null)
+        {
+            @foreach (IUser unit in MainModel.Pool)
+            {
+                @Html.Partial("_PoolUnitPartial", unit)
+            }
+        }
+        else
+        {
+            <h3>teams completed!</h3>
+            <h3>Results will be send on your e - mail</h3>
+        }
+    </div>
+    
+    <div class="col-md-4 team textred @(MainModel.Enemy.Count <=2 ? "enemyback":"")">
+        @foreach (Unit unit in MainModel.Enemy)
+        {
+            @Html.Partial("_TeamUnitPartial", unit)
+        }
+    </div>
+
+</div>
 }
 else
 {

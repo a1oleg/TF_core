@@ -15,58 +15,32 @@ namespace TF_core.Controllers
     {
         public IActionResult Index()
         {
-            Repo.db = new GraphClient(new Uri("http://localhost:11003/db/data"));
-            //db = new GraphClient(new Uri("https://hobby-cjifkhhaanncgbkeedghmepl.dbs.graphenedb.com:24780/db/data/"), "a1oleg", "b.JgAr7iM4iqi3.PtrraWURkTLBhkB0");
-
-            Repo.db.Connect();
-
-            string email = User.Identities.First().Claims.Where(c => c.Type == "emails").Single().Value;
-            if (User.Identities.First().Claims.Where(c => c.Type == "InDB") == null)
-            {
-                Repo.MergeVertex(email, "User");
-                User.Identities.First().AddClaim(new System.Security.Claims.Claim("InDB", "true"));
-            }
-            else if (User.Identities.First().Claims.Where(c => c.Type == "Complete").Single().Value == "true")
-                return RedirectToAction("GetTeamsFromDB");
-
-            GetTimeLine();
-            return RedirectToAction("CreateTeams");  
-        }
-
-        public ViewResult GetTeamsFromDB()
-        {
-            MainModel.Friendly = new List<Unit>(Repo.GetWithRelName(User.Identities.First().Claims.Where(c => c.Type == "emails").Single().Value, "Friendly"));
-            MainModel.Enemy = new List<Unit>(Repo.GetWithRelName(User.Identities.First().Claims.Where(c => c.Type == "emails").Single().Value, "Enemy"));
-
-            return View("Index");
-        }
-
-        public IActionResult CheckTeams()
-        {
-            if (MainModel.Friendly.Count() + MainModel.Enemy.Count() >= 10)
-            {
-                MainModel.Pool = null;
-                return View("Index");
-            }                
+            if (!User.Identities.First().IsAuthenticated)
+                return View();
             else
-                return RedirectToAction("GetPool");
-        }
+            {
+                Repo.db = new GraphClient(new Uri("http://localhost:11003/db/data"));
+                //db = new GraphClient(new Uri("https://hobby-cjifkhhaanncgbkeedghmepl.dbs.graphenedb.com:24780/db/data/"), "a1oleg", "b.JgAr7iM4iqi3.PtrraWURkTLBhkB0");
 
-        public void GetTimeLine()
-        {
-            Auth.SetUserCredentials("tsyORY4SD9j5b5JyXHbzQI0GA", "5J3LHiasGNSycdcaGkd8BYhNs6p1YxkM7OhUrG9dhShhZT585t",
-               "218404828-6ytjbb1jPcY4GAvlLvdiGlqsN27WSjvvRWhPsp9n", "JzfiOUQ1bbxd8LIS6Ke04Nmy0VABaCpWgXRd5QRcABFFq");
+                Repo.db.Connect();
 
-            List<IUser> timeline = new List<IUser>();
+                string email = User.Identities.First().Name;
+                if (!User.Identities.First().Claims.Where(c => c.Type == "InDB").Any())
+                {
+                    Repo.MergeVertex(email, "User");
+                    User.Identities.First().AddClaim(new System.Security.Claims.Claim("InDB", "true"));
+                }
+                else if (User.Identities.First().Claims.Where(c => c.Type == "Complete").Single().Value == "true")
+                    return RedirectToAction("GetTeamsFromDB");
 
-            foreach (ITweet tweet in Timeline.GetHomeTimeline().Distinct()) //Aggregate
-                MainModel.TimeLine.Add(tweet.CreatedBy);            
-        }
+                GetTimeLine();
+                MainModel.Pool = new List<IUser>();
+                return RedirectToAction("CreateTeams");
+            }
+        }       
 
-        public ViewResult GetPool()
-        {
-            MainModel.Pool = new List<IUser>();
-
+        public ViewResult CreateTeams()
+        { 
             while (MainModel.Pool.Count < 5)
             {
                 IUser newUnit = MainModel.TimeLine.ElementAt(new Random().Next(0, MainModel.TimeLine.Count()));
@@ -78,7 +52,7 @@ namespace TF_core.Controllers
             return View("Index");
         }
 
-        public ViewResult DraftOrDrop(string ScreenName/*, bool FriendlyOrNot*/)
+        public RedirectToActionResult DraftOrDrop(string ScreenName)
         {
             IUser PickedUnit = MainModel.Pool.Where(u => u.ScreenName == ScreenName).Single();
             MainModel.Pool.Remove(PickedUnit);
@@ -86,11 +60,39 @@ namespace TF_core.Controllers
             var targetTeam = MainModel.DoD ? MainModel.Friendly : MainModel.Enemy;
 
             targetTeam.Add(new Unit() { ScreenName = PickedUnit.ScreenName, ProfileImage = PickedUnit.ProfileImageUrl400x400 });
-            
-            return View ("Index");
+
+            return RedirectToAction("CheckTeams");
         }
 
+        public IActionResult CheckTeams()
+        {
+            if (MainModel.Friendly.Count() + MainModel.Enemy.Count() >= 10)
+            {
+                MainModel.Pool = null;
+                return View("Index");
+            }
+            else
+                return RedirectToAction("CreateTeams");
+        }
 
+        public ViewResult GetTeamsFromDB()
+        {
+            MainModel.Friendly = new List<Unit>(Repo.GetWithRelName(User.Identities.First().Claims.Where(c => c.Type == "emails").Single().Value, "Friendly"));
+            MainModel.Enemy = new List<Unit>(Repo.GetWithRelName(User.Identities.First().Claims.Where(c => c.Type == "emails").Single().Value, "Enemy"));
+
+            return View("Index");
+        }
+
+        public void GetTimeLine()
+        {
+            Auth.SetUserCredentials("tsyORY4SD9j5b5JyXHbzQI0GA", "5J3LHiasGNSycdcaGkd8BYhNs6p1YxkM7OhUrG9dhShhZT585t",
+               "218404828-6ytjbb1jPcY4GAvlLvdiGlqsN27WSjvvRWhPsp9n", "JzfiOUQ1bbxd8LIS6Ke04Nmy0VABaCpWgXRd5QRcABFFq");
+
+            MainModel.TimeLine = new List<IUser>();
+
+            foreach (ITweet tweet in Timeline.GetHomeTimeline().Distinct()) //Aggregate
+                MainModel.TimeLine.Add(tweet.CreatedBy);
+        }
         //[AllowAnonymous]
         //[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         //public IActionResult Error()

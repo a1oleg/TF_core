@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.0-preview2-final" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.AzureAD.UI" Version="2.1.0-preview2-final" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.0-preview2-final" />
     <PackageReference Include="Neo4jClient" Version="3.0.1.15" />
     <PackageReference Include="TweetinviAPI" Version="3.0.0" />
   </ItemGroup>
