@@ -8,6 +8,7 @@
     <environment include="Development">
         <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
         <link rel="stylesheet" href="~/css/site.css" />
+        <link rel="stylesheet" href="~/css/tf.css" />
     </environment>
     <environment exclude="Development">
         <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/css/bootstrap.min.css"
@@ -17,37 +18,37 @@
     </environment>
 </head>
 <body>
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-        <div class="container">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">TF_core</a>
-            </div>
-            <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav">
-                    <li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
-                    <li><a asp-area="" asp-controller="Home" asp-action="About">About</a></li>
-                    <li><a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>
-                </ul>
-                <partial name="_LoginPartial" />
+    @if (User.Identities.First().IsAuthenticated)
+    {
+        <div class="container header-test">
+            <div class="navbar">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div>
+                            <h2>@ViewBag.Email</h2>
+                        </div>
+                        <div>
+                            @Html.ActionLink("Sign out", "SignOut", "Account")
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <img src="../Pictures/TF20090.png" class="img-custom" alt="TrendFighter">
+                    </div>
+                </div>
             </div>
         </div>
-    </nav>
 
-    <partial name="_CookieConsentPartial" />
-
-    <div class="container body-content">
-        @RenderBody()
-        <hr />
-        <footer>
-            <p>&copy; 2018 - TF_core</p>
-        </footer>
-    </div>
+        <div class="container body-content body-auth">
+            @RenderBody()
+        </div>
+    }
+    else
+    {
+        <div class="container body-content body-not-auth">
+            @RenderBody()
+        </div>
+    }
 
     <environment include="Development">
         <script src="~/lib/jquery/dist/jquery.js"></script>
@@ -73,3 +74,55 @@
     @RenderSection("Scripts", required: false)
 </body>
 </html>
+@*<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrendFighter</title>
+    
+
+
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+</head>
+<body>
+    @if (Request.IsAuthenticated)
+    {
+        <div class="container header-test">
+            <div class="navbar">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div>
+                            <h2>@ViewBag.Email</h2>
+                        </div>
+                        <div>
+                            @Html.ActionLink("Sign out", "SignOut", "Account")
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <img src="../Pictures/TF20090.png" class="img-custom" alt="TrendFighter">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container body-content body-auth">
+            @RenderBody()
+        </div>
+    }
+    else
+    {
+        <div class="container body-content body-not-auth">
+            @RenderBody()
+        </div>
+    }
+
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
+    <script src="~/Scripts/profile-dropdown.js"></script>
+</body>
+</html>*@

@@ -1,0 +1,29 @@
+﻿
+.img-custom {
+    max-height: 100px;
+}
+
+.header-test {
+    background-image: url(../Pictures/header-test.png);
+    background-repeat: no-repeat;
+    background-position: left bottom;
+    background-size: cover;
+    color: blanchedalmond;
+}
+
+.body-auth {
+    background-image: url(../Pictures/body-test.png);
+    background-repeat: no-repeat;
+    background-position: left top;
+    background-size: cover;
+    min-height: 850px;
+}
+
+.body-not-auth {
+    background-image: url(../Pictures/zastavka.png);
+    background-repeat: no-repeat;
+    background-position: center bottom;
+    /*background-size: cover;*/
+    min-height: 800px;
+}
+

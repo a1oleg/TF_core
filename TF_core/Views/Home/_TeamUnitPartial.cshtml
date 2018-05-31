@@ -1,17 +1,14 @@
 ﻿@using TF_core.Models
 @model Unit
 
-<style>
-    .img-custom {
-        max-height: 100px;
-    }
-</style>
-
 <div class="media">
     <div class="media-left">
-        <a href="@("https://twitter.com/" + Model.Name)" target="_blank" title="@(Model.Name)">
+        <a href="@("https://twitter.com/" + Model.ScreenName)" target="_blank" title="@(Model.ScreenName)">
             <img class="media-object img-custom" src="@(Model.ProfileImage)" alt="...">
         </a>
+        @*<a href="@("https://twitter.com/" + Model.ScreenName)" target="_blank" title="@(Model.ScreenName)">
+            <img class="media-object img-custom" src="@(Model.ProfileImageUrl400x400)" alt="...">
+        </a>*@
     </div>
     <div class="media-body">
         <h2 class="media-heading">@Model.Name</h2>

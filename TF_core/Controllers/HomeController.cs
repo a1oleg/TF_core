@@ -47,11 +47,14 @@ namespace TF_core.Controllers
             MainModel.Pool = new List<IUser>();
             while (MainModel.Pool.Count < 5)
             {
-                IUser newUnit = MainModel.TimeLine.ElementAt(new Random().Next(0, MainModel.TimeLine.Count()));
-                MainModel.TimeLine.Remove(newUnit);
+                IUser newUnit = MainModel.TimeLine.ElementAt(new Random().Next(0, MainModel.TimeLine.Count()));                
 
-                if (!MainModel.Team.Where(u => u.Name == newUnit.ScreenName).Any())
+                if (!MainModel.Pool.Contains(newUnit) && !MainModel.Team.Where(u => u.Name == newUnit.Name).Any())
+                {
+                    MainModel.TimeLine.Remove(newUnit);
                     MainModel.Pool.Add(newUnit);
+                }
+                    
             }
             return View("Index");
         }
@@ -61,7 +64,7 @@ namespace TF_core.Controllers
             IUser PickedUnit = MainModel.Pool.Where(u => u.ScreenName == ScreenName).Single();
             MainModel.Pool.Remove(PickedUnit);
 
-            MainModel.Team.Add(new Unit() { Name = PickedUnit.ScreenName, ProfileImage = PickedUnit.ProfileImageUrl400x400, Friendly = MainModel.DoD });
+            MainModel.Team.Add(new Unit() { Name = PickedUnit.Name, ProfileImage = PickedUnit.ProfileImageUrl400x400, Friendly = MainModel.DoD });
 
             if (MainModel.Team.Count() < 10)
                 return RedirectToAction("GetPool");
